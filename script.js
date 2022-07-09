@@ -1,5 +1,6 @@
 'use strict';
 
+// ELEMENTS ////////////////////////////////
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const form = document.querySelector('.form');
@@ -10,9 +11,12 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-let map, mapEvent; // assign empty variable to be reassigned in event listeners
+// let map, mapEvent; // assign empty variable to be reassigned in event listeners
 
-// CLASSES /////////////
+////////////////////////////////////////////////////////////////////////
+// APPLICATION ARCHITECTURE 
+
+/* PARENT CLASSES*/
 
 class App {
   #map;
@@ -31,7 +35,7 @@ class App {
 
   // Methods
   
-  //note: need to bind callback functions to the this keyword otherwise it will act as a regular function, where the this keyword returns undefined
+  //note: need to bind callback functions to the this keyword otherwise it will act as a regular function and return undefined
   _getPosition() {
     if (navigator.geolocation) 
     navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
@@ -92,4 +96,46 @@ class App {
 };
 
 const app = new App();
+
+class Workout {
+  date = new Date();
+  id = (Date.now() + '').slice(-10);
+
+  constructor(coords, distance, duration) {
+    this.coords = coords; // [lat, lng]
+    this.distance = distance; // in km
+    this.duration = duration; // in mins
+  }
+};
+
+/* CHILD CLASSES*/
+
+class Running extends Workout {
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
+    this.cadence = cadence;
+    this.calcPace();
+  }
+  
+  /*Methods*/
+  calcPace() {
+    this.pace = this.duration / this.distance; // mins/km
+    return this.pace;
+  }
+};
+
+class Cycling extends Workout {
+  constructor(coords, distance, duration, elevation) {
+    super(coords, distance, duration);
+    this.elevation = elevation;
+    this.calcSpeed();
+  }
+
+  /*Methods*/
+  calcSpeed() {
+    this.speed = this.distance / (this.duration / 60); // km/hr
+    return this.speed;
+  }
+};
+
 
