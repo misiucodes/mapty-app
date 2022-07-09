@@ -31,7 +31,7 @@ class App {
 
   // Methods
   
-  //note: we need to bind the callback functions to the this keyword otherwise it will act as a regular function, where the this keyword returns undefined
+  //note: need to bind callback functions to the this keyword otherwise it will act as a regular function, where the this keyword returns undefined
   _getPosition() {
     if (navigator.geolocation) 
     navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
