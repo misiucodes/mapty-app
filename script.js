@@ -12,50 +12,71 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 let map, mapEvent; // assign empty variable to be reassigned in event listeners
 
+// CLASSES /////////////
 
-// GEOLOCATION /////////
+class App {
+  #map;
+  #mapEvent;
+  
+  constructor() {
+    // Get user's current geo coordinates and load map
+    this._getPosition();
 
-// Accepts 2 call back functions, success or else
+    // Event handler - listen for form submits to add new workout
+    form.addEventListener('submit', this._newWorkout.bind(this)); 
 
-if (navigator.geolocation) 
-navigator.geolocation.getCurrentPosition(
-  function(position) {
+    // Event handler - listen for form toggle btwn running + cycling field
+    inputType.addEventListener('change', this._toggleElevationField);
+  }
+
+  // Methods
+  
+  //note: we need to bind the callback functions to the this keyword otherwise it will act as a regular function, where the this keyword returns undefined
+  _getPosition() {
+    if (navigator.geolocation) 
+    navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
+      alert('Could not get your location');
+    });
+  }
+  
+  _loadMap(position) {
     const {latitude} = position.coords;
     const {longitude} = position.coords;
     const coords = [latitude, longitude];
-
+    
     // Parameter is the HTML element id, value in setView is zoom level
-    map = L.map('map').setView(coords, 13);
-
+    this.#map = L.map('map').setView(coords, 13);
+    
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Leaflet Event Listener - handling clicks on map
-    map.on('click', function(mapE) {
-      // Show form on map click
-      mapEvent = mapE;
-      form.classList.remove('hidden');
-      inputDistance.focus(); // enables blinking cursor in distance field
-    });
-  }, 
-  function() {
-      alert('Could not get your location');
-    }
-  );
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(this.#map);
   
-  // Event Listener - handling popup marker upon form submit
-  form.addEventListener('submit', function(e) {
+    // Leaflet Event Listener - handling clicks on map
+    this.#map.on('click', this._showForm.bind(this));
+  }
+  
+  _showForm(mapE) {
+    this.#mapEvent = mapE;
+    form.classList.remove('hidden');
+    inputDistance.focus(); // enables blinking cursor in distance field
+  }
+  
+  _toggleElevationField() {
+    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  }
+  
+  _newWorkout(e) {
     e.preventDefault();
-
+  
     // Clear input fields
     inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
-
-    // Display marker
-    const {lat, lng} = mapEvent.latlng;
   
+    // Display marker
+    const {lat, lng} = this.#mapEvent.latlng;
+    
     L.marker([lat, lng])
-    .addTo(map)
+    .addTo(this.#map)
     // Pass in object to customize popup style from Leaflet library
     .bindPopup(L.popup({
       maxWidth: 250,
@@ -67,10 +88,8 @@ navigator.geolocation.getCurrentPosition(
     )
     .setPopupContent('Workout')
     .openPopup();
-});
+  }
+};
 
-// Event Listener - handling switch from running to cycling
-inputType.addEventListener('change', function() {
-  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-});
+const app = new App();
+
