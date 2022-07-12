@@ -19,19 +19,18 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
   #map;
+  #mapZoom = 13;
   #mapEvent;
   #workouts = [];
   
   constructor() {
-
     // Get user's current geo coordinates and load map
     this._getPosition();
-
     // Event handler - listen for form submits to add new workout
     form.addEventListener('submit', this._newWorkout.bind(this)); 
-
     // Event handler - listen for form toggle btwn running + cycling field
     inputType.addEventListener('change', this._toggleElevationField);
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   // Methods
@@ -50,7 +49,7 @@ class App {
     const coords = [latitude, longitude];
     
     // Parameter is the HTML element id, value in setView is zoom level
-    this.#map = L.map('map').setView(coords, 13);
+    this.#map = L.map('map').setView(coords, this.#mapZoom);
     
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -64,6 +63,13 @@ class App {
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
     inputDistance.focus(); // enables blinking cursor in distance field
+  }
+
+  _hideForm() {
+    inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
+    form.style.display = 'none'; // ensures there's no animation first
+    form.classList.add('hidden');
+    setTimeout(() => form.style.display = 'grid', 1000); // set style back to grid after 1 sec so there's no transition 
   }
   
   _toggleElevationField() {
@@ -124,10 +130,9 @@ class App {
     this._renderWorkoutList(workout);
     
     // Hide form & clear input fields
-    form.classList.add('hidden');
-    inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = '';
+    this._hideForm();
   }
-
+  
   _renderWorkoutList(workout) {
     let html = `
       <li class="workout workout--${workout.name}" data-id="${workout.id}">
@@ -193,8 +198,24 @@ class App {
         className: `${workout.type}-popup`,
       })
     )
-    .setPopupContent('workout') // need to fix error
+    .setPopupContent(`${workout.description}`) 
     .openPopup();
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+    // console.log(workoutEl);
+    if (!workoutEl) return; // guard clause to prevent clicks outside the container
+    const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
+    // console.log(workout);
+
+    // Leaflet method to zoom in to map marker
+    this.#map.setView(workout.coords, this.#mapZoom, {
+      animate: true,
+      pan: {
+        duration: 1,
+      }
+    });
   }
 };
 
@@ -221,6 +242,7 @@ class Workout {
 
 class Running extends Workout {
   type = 'running';
+
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
