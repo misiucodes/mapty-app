@@ -24,8 +24,10 @@ class App {
   #workouts = [];
   
   constructor() {
-    // Get user's current geo coordinates and load map
+    // Get user's coordinates
     this._getPosition();
+    // Event handler - get data from local storage
+    this._getLocalStorage();
     // Event handler - listen for form submits to add new workout
     form.addEventListener('submit', this._newWorkout.bind(this)); 
     // Event handler - listen for form toggle btwn running + cycling field
@@ -57,6 +59,11 @@ class App {
   
     // Leaflet Event Listener - handling clicks on map
     this.#map.on('click', this._showForm.bind(this));
+
+    // If data in local storage, render workout markers on map. Logic needs to live here because at this point, the map will be loaded
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
   
   _showForm(mapE) {
@@ -78,10 +85,10 @@ class App {
   }
   
   _newWorkout(e) {
-    // Helper function - will loop over array of inputs to check if valid number
+    // Helper function - loop over array of inputs to check if valid number
     const validInputs = (...inputs) => inputs.every(inp => Number.isFinite(inp));
     
-    // Helper function - testing for positive numbers 
+    // Helper function - check for positive numbers 
     const allPositive = (...inputs) => inputs.every(inp => inp > 0); 
 
     e.preventDefault();
@@ -121,7 +128,6 @@ class App {
       
     // Add new object to workout array
     this.#workouts.push(workout); 
-    console.log(workout);
 
     // Render workout on map as marker
     this._renderWorkoutMarker(workout);
@@ -131,11 +137,14 @@ class App {
     
     // Hide form & clear input fields
     this._hideForm();
+
+    // Set local storage to all workouts
+    this._setLocalStorage();
   }
   
   _renderWorkoutList(workout) {
     let html = `
-      <li class="workout workout--${workout.name}" data-id="${workout.id}">
+      <li class="workout workout--${workout.type}" data-id="${workout.id}">
         <h2 class="workout__title">${workout.description}</h2>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} </span>
@@ -204,10 +213,8 @@ class App {
 
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
-    // console.log(workoutEl);
     if (!workoutEl) return; // guard clause to prevent clicks outside the container
     const workout = this.#workouts.find(work => work.id === workoutEl.dataset.id);
-    // console.log(workout);
 
     // Leaflet method to zoom in to map marker
     this.#map.setView(workout.coords, this.#mapZoom, {
@@ -216,6 +223,27 @@ class App {
         duration: 1,
       }
     });
+  }
+
+  _setLocalStorage() {
+    // Local storage API from browser - takes in 2 parameters, name and string - can use JSON.stringify to pass in an object 
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    // Guard clause - Check if there's any data in local storage
+    if (!data) return;
+    // If data exists, restore workouts array and display in list and map
+    this.#workouts = data;
+    this.#workouts.forEach(work => {
+      this._renderWorkoutList(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 };
 

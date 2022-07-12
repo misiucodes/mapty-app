@@ -178,14 +178,14 @@ a:visited {
   color: var(--color-light--1);
 }
 
-.twitter-link:link,
-.twitter-link:visited {
+.portfolio-link:link,
+.portfolio-link:visited {
   color: var(--color-light--1);
   transition: all 0.2s;
 }
 
-.twitter-link:hover,
-.twitter-link:active {
+.portfolio-link:hover,
+.portfolio-link:active {
   color: var(--color-light--2);
 }
 
