@@ -9,8 +9,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-const btnOptions = document.querySelector('.btn--options');
-
+const btnReset = document.querySelector('.btn__reset');
 
 ////////////////////////////////////////////////////////////////////////
 // APPLICATION ARCHITECTURE 
@@ -33,23 +32,21 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this)); 
     // Event handler - listen for form toggle btwn running + cycling field
     inputType.addEventListener('change', this._toggleElevationField);
-
-    // containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-
+    // Event handler - listen for clicks in workout container to delete/movetoPopup
     containerWorkouts.addEventListener('click', (e) => {
       const btnDelete = e.target.closest('.btn__delete');
-      if (!btnDelete) this._moveToPopup(e);
+      if(!btnDelete) this._moveToPopup(e);
       else {
         const workoutEl = e.target.closest('.workout');
         if(!workoutEl) return;
         this.deleteWorkout(workoutEl.dataset.id);
       }
     });
+    // Event handler - reset button
+    btnReset.addEventListener('click', this.reset.bind(this));
   }
 
-  // Methods
-  
-  //note: need to bind callback functions to the this keyword otherwise it will act as a regular function and return undefined
+  /* Methods note: need to bind callback functions to the this keyword otherwise it will act as a regular function and return undefined*/
   _getPosition() {
     if (navigator.geolocation) 
     navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
@@ -157,8 +154,7 @@ class App {
   _renderWorkoutList(workout) {
     let html = `
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
-        <h2 class="workout__title">
-          <span>${workout.description}</span>
+        <h2 class="workout__title">${workout.description}
           <div class="workout__options">
             <span class="btn__edit"><i class="fa-solid fa-pen-to-square"></i></span>
             <span class="btn__delete"><i class="fa-solid fa-trash-can"></i></span>
@@ -213,12 +209,11 @@ class App {
   }
 
   _renderWorkoutMarker(workout) {
-    const marker = L.marker(workout.coords);
-    this.#markers.push(marker);
-    marker
-      .addTo(this.#map)
-      // Pass in object to customize popup style from Leaflet library
-      .bindPopup(
+    let marker = 
+      L.marker(workout.coords)
+       .addTo(this.#map)
+    // Pass in object to customize popup style from Leaflet library
+       .bindPopup(
       L.popup({
         maxWidth: 250,
         minWidth: 100,
@@ -229,6 +224,8 @@ class App {
     )
     .setPopupContent(`${workout.description}`) 
     .openPopup();
+
+    this.#markers.push(marker);
   }
 
   _moveToPopup(e) {
@@ -262,17 +259,16 @@ class App {
   }
 
   deleteWorkout(id) {
-    const domEL = document.querySelector(`[data-id="${id}"]`);
-    this.#workouts.forEach((wk, i) => {
-      if (wk.id === id) {
+    const domEl = document.querySelector(`[data-id="${id}"]`);
+      this.#workouts.forEach((work, i) => {
+        if(work.id === id) {
         this.#workouts.splice(i, 1);
-
         this.#markers[i].remove();
         this.#markers.splice(i, 1);
       }
     });
     this._setLocalStorage();
-    domEL.remove();
+    domEl.remove();
   }
 
   reset() {
@@ -334,3 +330,4 @@ class Cycling extends Workout {
     return this.speed;
   }
 };
+
