@@ -20,7 +20,11 @@
       crossorigin="" />
     <script defer src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
       integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
-      crossorigin=""></script>
+      crossorigin="">
+    </script>
+
+    <script src="https://kit.fontawesome.com/36660f2c78.js" crossorigin="anonymous">
+    </script>
 
     <script defer src="script.js"></script>
     
@@ -32,6 +36,10 @@
 
       <ul class="workouts">
         <form class="form hidden">
+          <span class="btn--options">
+            <i class="fa-solid fa-pen-to-square btn__edit"></i>
+            <i class="fa-solid fa-trash-can btn__delete"></i>
+          </span>
           <div class="form__row">
             <label class="form__label">Type</label>
             <select class="form__input form__input--type">
@@ -64,7 +72,6 @@
               placeholder="meters"
             />
           </div>
-          <button class="form__btn">OK</button>
         </form>
 
         <!-- <li class="workout workout--running" data-id="1234567890">
@@ -88,6 +95,10 @@
             <span class="workout__icon">🦶🏼</span>
             <span class="workout__value">178</span>
             <span class="workout__unit">spm</span>
+          </div>
+          <div class="btn--options">
+            <a href="#"><i class="fa-solid fa-pen-to-square btn__edit"></i></a>
+            <a href="#"><i class="fa-solid fa-trash-can btn__delete"></i></a>
           </div>
         </li>
 

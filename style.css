@@ -1,7 +1,6 @@
 :root {
   --color-brand--1: #ffb545;
   --color-brand--2: #00c46a;
-
   --color-dark--1: #2d3439;
   --color-dark--2: #42484d;
   --color-light--1: #aaa;
@@ -71,15 +70,16 @@ a:visited {
   border-radius: 5px;
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
-  cursor: pointer;
 
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
 }
+
 .workout--running {
   border-left: 5px solid var(--color-brand--2);
 }
+
 .workout--cycling {
   border-left: 5px solid var(--color-brand--1);
 }
@@ -87,7 +87,29 @@ a:visited {
 .workout__title {
   font-size: 1.7rem;
   font-weight: 600;
+  display: flex;
+  justify-content: space-between;
   grid-column: 1 / -1;
+  cursor: pointer;
+}
+
+.workout__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  font-size: 1.25rem;
+  cursor: pointer;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.btn__edit, .btn__delete {
+  background-color: #2d3439;
+  padding: .4rem .8rem;
+  border-radius: 8px;
+}
+
+.btn__edit:hover, .btn__delete:hover {
+  background-color: rgb(180, 75, 75);
 }
 
 .workout__details {
@@ -170,6 +192,7 @@ a:visited {
 .form__btn {
   display: none;
 }
+
 
 .copyright {
   margin-top: auto;

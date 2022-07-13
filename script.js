@@ -9,8 +9,8 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const btnOptions = document.querySelector('.btn--options');
 
-// let map, mapEvent; // assign empty variable to be reassigned in event listeners
 
 ////////////////////////////////////////////////////////////////////////
 // APPLICATION ARCHITECTURE 
@@ -21,6 +21,7 @@ class App {
   #map;
   #mapZoom = 13;
   #mapEvent;
+  #markers = [];
   #workouts = [];
   
   constructor() {
@@ -32,7 +33,18 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this)); 
     // Event handler - listen for form toggle btwn running + cycling field
     inputType.addEventListener('change', this._toggleElevationField);
-    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    // containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    containerWorkouts.addEventListener('click', (e) => {
+      const btnDelete = e.target.closest('.btn__delete');
+      if (!btnDelete) this._moveToPopup(e);
+      else {
+        const workoutEl = e.target.closest('.workout');
+        if(!workoutEl) return;
+        this.deleteWorkout(workoutEl.dataset.id);
+      }
+    });
   }
 
   // Methods
@@ -145,7 +157,13 @@ class App {
   _renderWorkoutList(workout) {
     let html = `
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
-        <h2 class="workout__title">${workout.description}</h2>
+        <h2 class="workout__title">
+          <span>${workout.description}</span>
+          <div class="workout__options">
+            <span class="btn__edit"><i class="fa-solid fa-pen-to-square"></i></span>
+            <span class="btn__delete"><i class="fa-solid fa-trash-can"></i></span>
+          </div>
+        </h2>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} </span>
             <span class="workout__value">${workout.distance}</span>
@@ -195,10 +213,12 @@ class App {
   }
 
   _renderWorkoutMarker(workout) {
-    L.marker(workout.coords)
-    .addTo(this.#map)
-    // Pass in object to customize popup style from Leaflet library
-    .bindPopup(
+    const marker = L.marker(workout.coords);
+    this.#markers.push(marker);
+    marker
+      .addTo(this.#map)
+      // Pass in object to customize popup style from Leaflet library
+      .bindPopup(
       L.popup({
         maxWidth: 250,
         minWidth: 100,
@@ -239,6 +259,20 @@ class App {
     this.#workouts.forEach(work => {
       this._renderWorkoutList(work);
     });
+  }
+
+  deleteWorkout(id) {
+    const domEL = document.querySelector(`[data-id="${id}"]`);
+    this.#workouts.forEach((wk, i) => {
+      if (wk.id === id) {
+        this.#workouts.splice(i, 1);
+
+        this.#markers[i].remove();
+        this.#markers.splice(i, 1);
+      }
+    });
+    this._setLocalStorage();
+    domEL.remove();
   }
 
   reset() {
@@ -300,5 +334,3 @@ class Cycling extends Workout {
     return this.speed;
   }
 };
-
-
