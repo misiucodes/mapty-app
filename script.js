@@ -35,7 +35,13 @@ class App {
     // Event handler - listen for clicks in workout container to delete/movetoPopup
     containerWorkouts.addEventListener('click', (e) => {
       const btnDelete = e.target.closest('.btn__delete');
+      const btnEdit = e.target.closest('.btn__edit');
+
       if(!btnDelete) this._moveToPopup(e);
+      // if(btnEdit) {
+      //   const selectedEl = e.target.closest('.workout');
+      //   this.editWorkout(selectedEl.dataset.id);
+      // }
       else {
         const workoutEl = e.target.closest('.workout');
         if(!workoutEl) return;
@@ -46,7 +52,7 @@ class App {
     btnReset.addEventListener('click', this.reset.bind(this));
   }
 
-  /* Methods note: need to bind callback functions to the this keyword otherwise it will act as a regular function and return undefined*/
+  /* Methods*/
   _getPosition() {
     if (navigator.geolocation) 
     navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
@@ -59,7 +65,6 @@ class App {
     const {longitude} = position.coords;
     const coords = [latitude, longitude];
     
-    // Parameter is the HTML element id, value in setView is zoom level
     this.#map = L.map('map').setView(coords, this.#mapZoom);
     
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -69,7 +74,7 @@ class App {
     // Leaflet Event Listener - handling clicks on map
     this.#map.on('click', this._showForm.bind(this));
 
-    // If data in local storage, render workout markers on map. Logic needs to live here because at this point, the map will be loaded
+    // If data in local storage, render workout markers on map. Logic needs to live here because at this point map will be loaded
     this.#workouts.forEach(work => {
       this._renderWorkoutMarker(work);
     });
@@ -160,16 +165,16 @@ class App {
             <span class="btn__delete"><i class="fa-solid fa-trash-can"></i></span>
           </div>
         </h2>
-          <div class="workout__details">
-            <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} </span>
-            <span class="workout__value">${workout.distance}</span>
-            <span class="workout__unit">km</span>
-          </div>
-          <div class="workout__details">
-            <span class="workout__icon">⏱</span>
-            <span class="workout__value">${workout.duration}</span>
-            <span class="workout__unit">min</span>
-          </div>
+        <div class="workout__details">
+          <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} </span>
+          <span class="workout__value">${workout.distance}</span>
+          <span class="workout__unit">km</span>
+        </div>
+        <div class="workout__details">
+          <span class="workout__icon">⏱</span>
+          <span class="workout__value">${workout.duration}</span>
+          <span class="workout__unit">min</span>
+        </div>
       `;
 
       if (workout.type === 'running') {
@@ -258,6 +263,15 @@ class App {
     });
   }
 
+  // editWorkout(id) {
+  //   const selectedWorkout = document.querySelector(`[data-id="${id}"]`);
+  //   console.log(selectedWorkout);
+    
+  //   this.#workouts.forEach((work) => {
+  //     if (work.id === id) this._showForm(selectedWorkout.id); 
+  //   });
+  // }
+
   deleteWorkout(id) {
     const domEl = document.querySelector(`[data-id="${id}"]`);
       this.#workouts.forEach((work, i) => {
@@ -271,6 +285,7 @@ class App {
     domEl.remove();
   }
 
+  // For later - add modal pop up "are you sure you want to delete all your workouts?"
   reset() {
     localStorage.removeItem('workouts');
     location.reload();
