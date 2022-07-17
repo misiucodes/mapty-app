@@ -5,11 +5,12 @@
 const form = document.querySelector('.form');
 const containerWorkouts = document.querySelector('.workouts');
 const inputType = document.querySelector('.form__input--type');
-const inputDistance = document.querySelector('.form__input--distance');
+let inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const btnReset = document.querySelector('.btn__reset');
+const btnForm = document.querySelector('.form__btn');
 
 ////////////////////////////////////////////////////////////////////////
 // APPLICATION ARCHITECTURE 
@@ -35,11 +36,13 @@ class App {
     // Event handler - listen for clicks in workout container to delete/movetoPopup
     containerWorkouts.addEventListener('click', (e) => {
       const btnDelete = e.target.closest('.btn__delete');
-      if(!btnDelete) this._moveToPopup(e);
+      const btnEdit = e.target.closest('.btn__edit');
+      const selectedEl = e.target.closest('.workout');
+
+      if(btnDelete) this._deleteWorkout(selectedEl.dataset.id);
+      if(btnEdit) this._editWorkout(selectedEl.dataset.id);
       else {
-        const workoutEl = e.target.closest('.workout');
-        if(!workoutEl) return;
-        this.deleteWorkout(workoutEl.dataset.id);
+        this._moveToPopup(e);
       }
     });
     // Event handler - reset button
@@ -91,6 +94,36 @@ class App {
   _toggleElevationField() {
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
     inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  }
+
+  _editWorkout(id, workCoords) {
+
+    const editEl = document.querySelector(`[data-id="${id}"]`);
+    this.#workoutCoords.latlng = workCoords;
+    console.log(editCoords);
+    let editType = 'Running';
+    let editDuration = String(editEl.children[2].children[1].innerHTML);
+    let editDistance = String(editEl.children[3].children[1].innerHTML);
+    let editWorkout;
+    
+    // Reassign form field values into edit form
+    inputType.value = editType;
+    inputDistance.value = editDistance;
+    inputDuration.value = editDuration;
+    
+  
+    this._showForm();
+    
+    if (editType === 'Running') {
+      let editCadence = String(editEl.children[4].children[1].innerHTML);
+      inputCadence.value = editCadence;
+      
+      editWorkout = new Running(workoutCoords, editDistance, editDuration, editCadence);
+      // this.#workouts.push(editWorkout);
+      // this._renderWorkoutList(editWorkout);
+      // this._renderWorkoutMarker(editWorkout);
+    }
+    editEl.remove();
   }
   
   _newWorkout(e) {
@@ -155,7 +188,10 @@ class App {
     let html = `
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
         <h2 class="workout__title">${workout.description}
+          <div class="workout__options">
+            <span class="btn__edit"><i class="fa-solid fa-pen-to-square"></i></span>
             <span class="btn__delete"><i class="fa-solid fa-trash-can"></i></span>
+          </div>
         </h2>
           <div class="workout__details">
             <span class="workout__icon">${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} </span>
@@ -327,4 +363,3 @@ class Cycling extends Workout {
     return this.speed;
   }
 };
-
