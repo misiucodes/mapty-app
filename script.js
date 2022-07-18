@@ -11,6 +11,7 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const btnReset = document.querySelector('.btn__reset');
 
+
 ////////////////////////////////////////////////////////////////////////
 // APPLICATION ARCHITECTURE 
 
@@ -33,21 +34,24 @@ class App {
     // Event handler - listen for form toggle btwn running + cycling field
     inputType.addEventListener('change', this._toggleElevationField);
     // Event handler - listen for clicks in workout container to delete/movetoPopup
+    
+    // Event handler - delete workout
     containerWorkouts.addEventListener('click', (e) => {
       const btnDelete = e.target.closest('.btn__delete');
-      const btnEdit = e.target.closest('.btn__edit');
-
-      if(!btnDelete) this._moveToPopup(e);
-      // if(btnEdit) {
-      //   const selectedEl = e.target.closest('.workout');
-      //   this.editWorkout(selectedEl.dataset.id);
-      // }
+      if (!btnDelete) this._moveToPopup(e);
       else {
-        const workoutEl = e.target.closest('.workout');
-        if(!workoutEl) return;
-        this.deleteWorkout(workoutEl.dataset.id);
+        const selectedEl = e.target.closest('.workout');
+        if (!selectedEl) return;
+        this.deleteWorkout(selectedEl.dataset.id);
       }
     });
+
+    containerWorkouts.addEventListener('click', function (e) {
+        if (!e) return;
+        this._editWorkout(e);
+      }.bind(this)
+    );
+
     // Event handler - reset button
     btnReset.addEventListener('click', this.reset.bind(this));
   }
@@ -99,12 +103,6 @@ class App {
   }
   
   _newWorkout(e) {
-    // Helper function - loop over array of inputs to check if valid number
-    const validInputs = (...inputs) => inputs.every(inp => Number.isFinite(inp));
-    
-    // Helper function - check for positive numbers 
-    const allPositive = (...inputs) => inputs.every(inp => inp > 0); 
-
     e.preventDefault();
 
     // Get data from form
@@ -119,8 +117,8 @@ class App {
       const cadence = +inputCadence.value;
       // Check if data is valid
       if(
-        !validInputs(distance, duration, cadence) || 
-        !allPositive(distance, duration, cadence)
+        !this._validInputs(distance, duration, cadence) || 
+        !this._allPositive(distance, duration, cadence)
       )
         return alert('Inputs have to be positive numbers!'); 
 
@@ -132,8 +130,8 @@ class App {
       const elevation = +inputElevation.value;
       // Check if data is valid
       if (
-        !validInputs(distance, duration, elevation) || 
-        !allPositive(distance, duration)
+        !this._validInputs(distance, duration, elevation) || 
+        !this._allPositive(distance, duration)
         ) 
         return alert ('Inputs have to be positive numbers!');
       
@@ -152,6 +150,10 @@ class App {
     // Hide form & clear input fields
     this._hideForm();
 
+    // Listen for edit changes
+    const workoutContainer = document.querySelector('.workout');
+    workoutContainer.addEventListener('click', this._editWorkout.bind(this));
+
     // Set local storage to all workouts
     this._setLocalStorage();
   }
@@ -161,7 +163,6 @@ class App {
       <li class="workout workout--${workout.type}" data-id="${workout.id}">
         <h2 class="workout__title">${workout.description}
           <div class="workout__options">
-            <span class="btn__edit"><i class="fa-solid fa-pen-to-square"></i></span>
             <span class="btn__delete"><i class="fa-solid fa-trash-can"></i></span>
           </div>
         </h2>
@@ -181,12 +182,12 @@ class App {
         html += `
           <div class="workout__details">
             <span class="workout__icon">⚡️</span>
-            <span class="workout__value">${workout.pace.toFixed(1)}</span>
+            <span class="workout__value workout__value--pace" id="value-pace" data-type="pace">${workout.pace.toFixed(1)}</span>
             <span class="workout__unit">min/km</span>
           </div>
           <div class="workout__details">
             <span class="workout__icon">🦶🏼</span>
-            <span class="workout__value">${workout.cadence}</span>
+            <span class="workout__value" data-type="cadence">${workout.cadence}</span>
             <span class="workout__unit">spm</span>
           </div>
         </li>
@@ -197,12 +198,12 @@ class App {
         html += `
           <div class="workout__details">
             <span class="workout__icon">⚡️</span>
-            <span class="workout__value">${workout.speed.toFixed(1)}</span>
+            <span class="workout__value workout__value--speed" id="value-speed" data-type="speed">${workout.speed.toFixed(1)}</span>
             <span class="workout__unit">km/h</span>
           </div>
           <div class="workout__details">
             <span class="workout__icon">⛰</span>
-            <span class="workout__value">${workout.elevation}</span>
+            <span class="workout__value" data-type="elevation">${workout.elevation}</span>
             <span class="workout__unit">m</span>
           </div>
         </li>
@@ -263,16 +264,103 @@ class App {
     });
   }
 
-  // editWorkout(id) {
-  //   const selectedWorkout = document.querySelector(`[data-id="${id}"]`);
-  //   console.log(selectedWorkout);
-    
-  //   this.#workouts.forEach((work) => {
-  //     if (work.id === id) this._showForm(selectedWorkout.id); 
-  //   });
-  // }
+  // Helper functions - check user input 
+  _validInputs(...inputs) {
+    return inputs.every(inp => Number.isFinite(inp));
+  }
 
-  deleteWorkout(id) {
+  _allPositive(...inputs) {
+    return inputs.every(inp => inp > 0);
+  }
+
+  _editWorkout(e) {
+    if (e.target.classList.contains('form__btn')) return;
+    e.preventDefault();
+    const currentEl = e.target.closest('.workout');
+    const valueEl = e.target.closest('.workout__value');
+    const valueElDataSet = valueEl?.dataset?.type;
+    const speedEl = currentEl?.querySelector('#value-pace');
+    const paceEl = currentEl?.querySelector('#value-speed');
+
+    if(!valueEl || !currentEl) return;
+    if(valueElDataSet === 'pace' || valueElDataSet === 'speed')
+      return alert('Sorry, you cannot edit this number!');
+      
+    const html = `
+      <form class="form-edit">
+        <label></label>
+        <input type="text" class="form-edit__number" />
+      </form>
+      `;
+
+    if (valueEl.firstElementChild) return;
+    valueEl.insertAdjacentHTML('afterbegin', html);
+
+    const formEdit = document.querySelector('.form-edit');
+    const userInputField = document.querySelector('.form-edit__number');
+    userInputField.focus();
+
+    formEdit.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userInputValue = userInputField.value;
+      const currentElId = currentEl.dataset.id;
+
+      if (
+        !this._validInputs(+userInputValue) ||
+        !this._allPositive(+userInputValue) 
+      )
+        return alert('All inputs must be positive numbers');
+          
+      this._updateWorkoutArr(currentElId, valueElDataSet, userInputValue);
+        
+      formEdit.remove();
+        
+      if(userInputField.value === '') return;
+      valueEl.textContent = userInputValue;
+        
+      if(speedEl !== null) {
+        const speedElData = speedEl.dataset.type;
+        this._updateCalcUi(currentElId, speedElData, speedEl);
+      }
+        
+      if(paceEl !== null) {
+        const paceElData = paceEl.dataset.type;
+        this._updateCalcUi(currentElId, paceElData, paceEl);
+      }
+        
+      this._setLocalStorage();
+      }.bind(this));
+    }
+    
+    _updateCalcUi(dataId, dataType, el) {
+      this.#workouts.forEach(workout => {
+        if (workout.id === dataId) {
+          if (dataType === 'speed') {
+            if (!workout.calcSpeed) return;
+            workout.calcSpeed();
+            el.textContent = workout.speed.toFixed(1);
+          }
+          if (dataType === 'pace') {
+            if (!workout.calcPace) return;
+            workout.calcPace();
+            el.textContent = workout.pace.toFixed(1);
+          }
+        }
+      });
+    }
+  
+    _updateWorkoutArr(dataId, dataType, number) {
+      this.#workouts.forEach(workout => {
+        if(workout.id === dataId) {
+          if (dataType === 'duration') workout.duration = +number;
+          if (dataType === 'cadence') workout.cadence = +number;
+          if (dataType === 'distance') workout.distance = +number;
+          if (dataType === 'elevation') workout.elevation = +number;
+        }
+      });
+    }
+
+    deleteWorkout(id) {
     const domEl = document.querySelector(`[data-id="${id}"]`);
       this.#workouts.forEach((work, i) => {
         if(work.id === id) {
@@ -345,4 +433,5 @@ class Cycling extends Workout {
     return this.speed;
   }
 };
+
 

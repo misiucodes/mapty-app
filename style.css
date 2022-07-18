@@ -93,22 +93,14 @@ a:visited {
   cursor: pointer;
 }
 
-.workout__options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  font-size: 1.25rem;
-  cursor: pointer;
-  gap: .5rem;
-  align-items: flex-end;
-}
-
-.btn__edit, .btn__delete {
+.btn__delete {
   background-color: #2d3439;
   padding: .4rem .8rem;
   border-radius: 8px;
+  font-size: 13px;
 }
 
-.btn__edit:hover, .btn__delete:hover {
+.btn__delete:hover {
   background-color: rgb(180, 75, 75);
   transition: all 0.3s ease-in-out;
 }
@@ -127,6 +119,10 @@ a:visited {
 .workout__value {
   font-size: 1.5rem;
   margin-right: 0.5rem;
+}
+
+.workout__value:hover {
+  text-decoration: underline;
 }
 
 .workout__unit {
@@ -192,6 +188,47 @@ a:visited {
 .form__input:focus {
   outline: none;
   background-color: #fff;
+}
+
+/*UI for edits*/
+.form-edit {
+  position: relative;
+  left: 0;
+  top: 100%;
+  transition: all 250ms;
+}
+
+.form-edit::after {
+  content: '';
+  position: absolute;
+  bottom: 50%;
+  width: 1rem;
+  height: 1rem;
+  left: 50%;
+  background: #fff;
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+
+.form-edit__number {
+  width: 4rem;
+  position: relative;
+  z-index: 2;
+  border: none;
+  border-radius: 2px;
+}
+
+.form-edit__number:active,
+.form-edit__number:focus {
+  outline: 2px solid #00c46a;
+}
+
+.workout__value:hover {
+  cursor: url(img/pen-to-square-solid.svg), pointer;
+}
+
+.workout__value--pace:hover, .workout__value--speed:hover {
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
 .copyright {
