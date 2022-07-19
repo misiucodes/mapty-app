@@ -10,6 +10,13 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const btnReset = document.querySelector('.btn__reset');
+const modal = document.querySelector('.modal');
+const modalError = document.querySelector('.modal__error');
+const modalErrorInput = document.querySelector('.modal__error--input');
+const overlay = document.querySelector('.overlay');
+const btnCloseModal = document.querySelector('.close-modal');
+const btnCloseModalError = document.querySelector('.close-modal-error');
+const btnCloseModalErrorInput = document.querySelector('.close-modal-error-input')
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -58,9 +65,26 @@ class App {
 
   /* Methods*/
   _getPosition() {
+    const closeModal = function () {
+      modal.classList.add('hidden');
+      overlay.classList.add('hidden');
+    }
+
+    const openModal = function () {
+      modal.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+    }
+
     if (navigator.geolocation) 
-    navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), function() {
-      alert('Could not get your location');
+    navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), openModal);
+    else closeModal;
+
+    btnCloseModal.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+        closeModal();
+      }
     });
   }
   
@@ -111,19 +135,39 @@ class App {
     const duration = +inputDuration.value;
     const {lat, lng} = this.#mapEvent.latlng;
     let workout;
+
+    const openModalError = function () {
+      modalError.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      btnCloseModalError.addEventListener('click', closeModalError);
+      overlay.addEventListener('click', closeModalError);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modalError.classList.contains('hidden')) {
+          closeModalError();
+        }
+      });
+    }
+
+    const closeModalError = function () {
+      modalError.classList.add('hidden');
+      overlay.classList.add('hidden');
+    }
     
     // If workout running, create running object 
     if (type === 'running') {
+
       const cadence = +inputCadence.value;
       // Check if data is valid
-      if(
+      if (
         !this._validInputs(distance, duration, cadence) || 
         !this._allPositive(distance, duration, cadence)
-      )
-        return alert('Inputs have to be positive numbers!'); 
-
-        workout = new Running([lat, lng], distance, duration, cadence);
-    }
+      ) 
+       return openModalError();
+          
+       workout = new Running([lat, lng], distance, duration, cadence);
+      }
+    
 
     // If workout cycling, create cycling object
     if (type === 'cycling') {
@@ -133,7 +177,7 @@ class App {
         !this._validInputs(distance, duration, elevation) || 
         !this._allPositive(distance, duration)
         ) 
-        return alert ('Inputs have to be positive numbers!');
+        return openModalError();
       
         workout = new Cycling([lat, lng], distance, duration, elevation);
     }
@@ -282,9 +326,27 @@ class App {
     const speedEl = currentEl?.querySelector('#value-pace');
     const paceEl = currentEl?.querySelector('#value-speed');
 
+    const openModalErrorInput = function () {
+      modalErrorInput.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      btnCloseModalErrorInput.addEventListener('click', closeModalErrorInput);
+      overlay.addEventListener('click', closeModalErrorInput);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modalErrorInput.classList.contains('hidden')) {
+          closeModalErrorInput();
+        }
+      })
+    }
+
+    const closeModalErrorInput = function () {
+      modalErrorInput.classList.add('hidden');
+      overlay.classList.add('hidden');
+    }
+
     if(!valueEl || !currentEl) return;
     if(valueElDataSet === 'pace' || valueElDataSet === 'speed')
-      return alert('Sorry, you cannot edit this number!');
+      return openModalErrorInput();
       
     const html = `
       <form class="form-edit">
@@ -309,7 +371,7 @@ class App {
         !this._validInputs(+userInputValue) ||
         !this._allPositive(+userInputValue) 
       )
-        return alert('All inputs must be positive numbers');
+        return openModalErrorInput();
           
       this._updateWorkoutArr(currentElId, valueElDataSet, userInputValue);
         

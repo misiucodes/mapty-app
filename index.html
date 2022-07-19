@@ -32,6 +32,30 @@
   <div class="sidebar">
     <img src="img/logo.png" alt="Logo" class="logo" />
 
+    <!--Modal Window for Alerts//-->
+
+    <div class="modal hidden">
+      <button class="close-modal">&times;</button>
+      <p class="modal__title">Error</p>
+      <p class="modal__error-message">Oops, could not get your location! 😢</p>
+    </div>
+    <div class="overlay hidden"></div>
+
+    <div class="modal modal__error hidden">
+      <button class="close-modal-error">&times;</button>
+      <p class="modal__title">Error ⛔</p>
+      <p class="modal__error-message">All numbers must be positive values!</p>
+    </div>
+    <div class="overlay hidden"></div>
+
+    <div class="modal modal__error--input hidden">
+      <button class="close-modal-error-input">&times;</button>
+      <p class="modal__title">Error ⛔</p>
+      <p class="modal__error-message">Sorry, you cannot edit this value!</p>
+    </div>
+    <div class="overlay hidden"></div>
+    
+
     <ul class="workouts">
 
       <form class="form hidden">
@@ -61,6 +85,7 @@
         <button class="form__btn">OK</button>
       </form>
     </ul>
+    
 
     <button class="btn__reset">Reset</button>
     <p class="copyright">
