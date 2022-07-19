@@ -32,6 +32,8 @@ class App {
   #workouts = [];
   
   constructor() {
+    // Load instructions
+    this._loadInstructions();
     // Get user's coordinates
     this._getPosition();
     // Event handler - get data from local storage
@@ -64,6 +66,30 @@ class App {
   }
 
   /* Methods*/
+
+  _loadInstructions() {
+   
+    const hideHTML = function() {
+      html.display.style = 'none';
+    }
+  
+    const html = 
+    `<div class="instructions__container">
+      <p class="instructions__title">Get Started</p>
+      <ol class="instructions__description">
+        <li>Click anywhere on the map</li>
+        <li>Log your workout</li>
+        <li>Edit your stats by clicking on the value</li>
+        <li> Click the trashbin to delete a workout </li>
+        <li>Click reset to delete all your logs</li>
+      </ol>
+      <p class="instructions__footer">Happy logging! ✨</p>
+    </div>
+    `;
+
+    form.insertAdjacentHTML('beforebegin', html),
+  }
+
   _getPosition() {
     const closeModal = function () {
       modal.classList.add('hidden');
@@ -435,7 +461,6 @@ class App {
     domEl.remove();
   }
 
-  // For later - add modal pop up "are you sure you want to delete all your workouts?"
   reset() {
     localStorage.removeItem('workouts');
     location.reload();

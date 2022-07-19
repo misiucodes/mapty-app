@@ -39,6 +39,33 @@ a:visited {
   color: var(--color-brand--1);
 }
 
+/* APP INSTRUCTIONS */
+.instructions__container {
+  background-color: var(--color-dark--2);
+  border-radius: 5px;
+  padding: 1.5rem 3rem;
+  margin-bottom: 1.75rem;
+  height: 25rem;
+  transition: all 0.5s, transform 1ms;
+}
+
+.instructions__title {
+  font-size: 2rem;
+  text-align: center;
+  font-weight: bolder;
+}
+
+.instructions__description {
+  font-size: 1.5rem;
+  padding: 1.5rem 3rem;
+}
+
+.instructions__footer {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
 /* SIDEBAR */
 .sidebar {
   flex-basis: 50rem;
