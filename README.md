@@ -14,7 +14,7 @@ Mapty is a web based application created with JavaScript to map your running and
 
 Live Demo:
 
-https://user-images.githubusercontent.com/96598339/179831190-e7c46176-ed06-4009-b944-2a8ab5be6693.mp4
+https://user-images.githubusercontent.com/96598339/179832355-f5704a0f-f4f3-4cf0-971e-cd10281fe972.mp4
 
 ## Built With
 * JavaScript (structured using OOP)
@@ -29,6 +29,8 @@ The UI can be manipulated from the user by:
 * Deleting workouts
 * Resetting the app 
 * Navigating the map on the corresponding workout
+
+Added user friendly modal window to display errors when API cannot retrieve user's location, when user does not enter valid input and when user tries to change uneditable fields.
 
 ## Acknowledgements
 Concept from Jonas Schmedtmann's "Complete JavaScript Course". Additional features built by me.
