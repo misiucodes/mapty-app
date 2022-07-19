@@ -68,11 +68,6 @@ class App {
   /* Methods*/
 
   _loadInstructions() {
-   
-    const hideHTML = function() {
-      html.display.style = 'none';
-    }
-  
     const html = 
     `<div class="instructions__container">
       <p class="instructions__title">Get Started</p>
@@ -87,8 +82,8 @@ class App {
     </div>
     `;
 
-    form.insertAdjacentHTML('beforebegin', html),
-  }
+    form.insertAdjacentHTML('beforebegin', html);
+    }
 
   _getPosition() {
     const closeModal = function () {
